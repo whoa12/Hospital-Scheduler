@@ -1,26 +1,19 @@
-# Use an official OpenJDK image
-FROM eclipse-temurin:21-jdk-alpine
+FROM maven:3.9.2-eclipse-temurin-17 AS build
 
-# Set working directory inside container
 WORKDIR /app
 
-# Copy Maven wrapper and pom.xml first for caching dependencies
-COPY mvnw .
-COPY .mvn .mvn
 COPY pom.xml .
+RUN mvn dependency:go-offline
 
-# Download dependencies only
-RUN chmod +x mvnw
-RUN ./mvnw dependency:go-offline
-
-# Copy all source code
 COPY src ./src
 
-# Build the jar
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
-# Expose port
+FROM openjdk:17-jdk-alpine
+WORKDIR /app
+
+COPY --from=build /app/target/Hospital-Scheduler-0.0.1-SNAPSHOT.jar app.jar
+
 EXPOSE 8080
 
-# Run the jar
-CMD ["java", "-jar", "target/Hospital-Scheduler-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java","-jar","app.jar"]
