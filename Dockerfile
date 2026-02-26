@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jdk-slim AS build
+FROM eclipse-temurin:17-jdk AS build
 WORKDIR /app
 
 COPY pom.xml .
@@ -14,5 +14,6 @@ COPY --from=build /app/target/Hospital-Scheduler-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8080
 
 ENTRYPOINT ["java","-jar","app.jar"]
+
 
 
